@@ -295,6 +295,10 @@ int main( int argc, const char ** argv )
 		mkdir( "resources/out/", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	#endif
 
+	{
+		TIXMLASSERT( true );
+	}
+
 	if ( argc > 1 ) {
 		XMLDocument* doc = new XMLDocument();
 		clock_t startTime = clock();
@@ -863,10 +867,18 @@ int main( int argc, const char ** argv )
 
 	{
 		// Empty documents should return TIXML_XML_ERROR_PARSING_EMPTY, bug 1070717
-		const char* str = "    ";
+		const char* str = "";
 		XMLDocument doc;
 		doc.Parse( str );
 		XMLTest( "Empty document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
+	}
+
+	{
+		// Documents with all whitespaces should return TIXML_XML_ERROR_PARSING_EMPTY, bug 1070717
+		const char* str = "    ";
+		XMLDocument doc;
+		doc.Parse( str );
+		XMLTest( "All whitespaces document error", XML_ERROR_EMPTY_DOCUMENT, doc.ErrorID() );
 	}
 
 	{
@@ -1390,7 +1402,18 @@ int main( int argc, const char ** argv )
             doc.Clear();
         }
     }
+    
+    {
+        // If this doesn't assert in DEBUG, all is well.
+        tinyxml2::XMLDocument doc;
+        tinyxml2::XMLElement *pRoot = doc.NewElement("Root");
+        doc.DeleteNode(pRoot);
+    }
 
+	{
+		// Should not assert in DEBUG
+		XMLPrinter printer;
+	}
 
 	// ----------- Performance tracking --------------
 	{
