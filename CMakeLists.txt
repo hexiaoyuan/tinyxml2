@@ -1,3 +1,10 @@
+IF(BIICODE)
+	ADD_BIICODE_TARGETS()
+	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+		file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    ENDIF()
+    RETURN()
+ENDIF(BIICODE)
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 cmake_policy(VERSION 2.6)
 
@@ -10,8 +17,8 @@ include(GNUInstallDirs)
 ################################
 # set lib version here
 
-set(GENERIC_LIB_VERSION "2.2.0")
-set(GENERIC_LIB_SOVERSION "2")
+set(GENERIC_LIB_VERSION "3.0.0")
+set(GENERIC_LIB_SOVERSION "3")
 
 
 ################################

@@ -1167,7 +1167,11 @@ int main( int argc, const char ** argv )
 
     {
         XMLDocument doc;
+        XMLTest( "Document is initially empty", doc.NoChildren(), true );
+        doc.Clear();
+        XMLTest( "Empty is empty after Clear()", doc.NoChildren(), true );
         doc.LoadFile( "resources/dream.xml" );
+        XMLTest( "Document has something to Clear()", doc.NoChildren(), false );
         doc.Clear();
         XMLTest( "Document Clear()'s", doc.NoChildren(), true );
     }
@@ -1413,6 +1417,47 @@ int main( int argc, const char ** argv )
 	{
 		// Should not assert in DEBUG
 		XMLPrinter printer;
+	}
+
+	{
+		// Issue 291. Should not crash
+		const char* xml = "&#0</a>";
+		XMLDocument doc;
+		doc.Parse( xml );
+
+		XMLPrinter printer;
+		doc.Print( &printer );
+	}
+	{
+		// Issue 299. Can print elements that are not linked in. 
+		// Will crash if issue not fixed.
+		XMLDocument doc;
+		XMLElement* newElement = doc.NewElement( "printme" );
+		XMLPrinter printer;
+		newElement->Accept( &printer );
+		// Delete the node to avoid possible memory leak report in debug output
+		doc.DeleteNode( newElement );
+	}
+	{
+		// Issue 302. Clear errors from LoadFile/SaveFile
+		XMLDocument doc;
+		XMLTest( "Issue 302. Should be no error initially", "XML_SUCCESS", doc.ErrorName() );
+		doc.SaveFile( "./no/such/path/pretty.xml" );
+		XMLTest( "Issue 302. Fail to save", "XML_ERROR_FILE_COULD_NOT_BE_OPENED", doc.ErrorName() );
+		doc.SaveFile( "./resources/out/compact.xml", true );
+		XMLTest( "Issue 302. Subsequent success in saving", "XML_SUCCESS", doc.ErrorName() );
+	}
+
+	{
+		// If a document fails to load then subsequent
+		// successful loads should clear the error
+		XMLDocument doc;
+		XMLTest( "Should be no error initially", false, doc.Error() );
+		doc.LoadFile( "resources/no-such-file.xml" );
+		XMLTest( "No such file - should fail", true, doc.Error() );
+
+		doc.LoadFile( "resources/dream.xml" );
+		XMLTest( "Error should be cleared", false, doc.Error() );
 	}
 
 	// ----------- Performance tracking --------------
